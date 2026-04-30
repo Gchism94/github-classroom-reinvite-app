@@ -1,0 +1,184 @@
+# Instructor Setup
+
+This guide is for instructors running the GitHub Classroom Reinvite Tool. Version
+1 has no instructor login and no admin dashboard; instructor operations happen
+through scripts and environment variables.
+
+## Create the GitHub App
+
+1. Go to GitHub organization settings for the organization that owns the
+   Classroom repositories.
+2. Open **Developer settings** and create a new GitHub App.
+3. Set a clear name, such as `Classroom Reinvite Tool`.
+4. Set the homepage URL to your deployed app URL, or a placeholder while testing.
+5. Disable webhook delivery if you do not need webhooks for this app.
+6. Generate a private key and keep it out of git.
+7. Note the app ID.
+
+## Required Permissions
+
+For restoring write access to student repositories, start with these repository
+permissions:
+
+- Administration: Read and write
+- Metadata: Read-only
+
+The app must be able to call:
+
+```text
+PUT /repos/{owner}/{repo}/collaborators/{username}
+```
+
+Install the app only on the organization or repositories it needs.
+
+## Install the App
+
+Install the GitHub App on the organization that owns the GitHub Classroom
+repositories. After installation, note the installation ID. You can find it in
+the installation URL, or through GitHub's app installation API.
+
+## Configure `.env`
+
+Create a local `.env` file:
+
+```bash
+cp .env.example .env
+```
+
+Required for the web app:
+
+```bash
+GITHUB_APP_ID=123456
+GITHUB_INSTALLATION_ID=987654
+GITHUB_ORG=your-classroom-org
+GITHUB_PRIVATE_KEY="-----BEGIN RSA PRIVATE KEY-----\n...\n-----END RSA PRIVATE KEY-----"
+```
+
+Optional for Classroom sync:
+
+```bash
+GITHUB_CLASSROOM_ID=123456
+GITHUB_CLASSROOM_TOKEN=github_pat_or_app_user_token
+```
+
+Do not store secrets in JSON files. Do not commit `.env`, private keys, or
+tokens.
+
+## Sync Assignments
+
+GitHub Classroom assignment sync is run from a script:
+
+```bash
+python scripts/sync_classroom.py
+```
+
+The script reads `GITHUB_CLASSROOM_ID` from `.env` and writes assignment metadata
+to:
+
+```text
+data/assignments.json
+```
+
+Each imported assignment includes:
+
+- `id`
+- `title`
+- `slug`
+- `invite_link`
+- `deadline`
+
+The app uses `slug` as the repository prefix, so a student repo is constructed
+as:
+
+```text
+{assignment.slug}-{github_username}
+```
+
+The sync script also supports:
+
+```bash
+python scripts/sync_classroom.py --classroom-id 123456
+python scripts/sync_classroom.py --skip-accepted
+```
+
+GitHub's Classroom REST endpoints are user-context endpoints. If your GitHub App
+installation token cannot access them, set `GITHUB_CLASSROOM_TOKEN` to a token
+for a classroom admin. The script never prints the token.
+
+## Import Or Update The Whitelist
+
+Keep approved student usernames in:
+
+```text
+data/whitelist.json
+```
+
+Import from a CSV:
+
+```bash
+python scripts/import_whitelist.py students.csv
+```
+
+By default, the importer looks for a `github_username` column. To use a different
+column:
+
+```bash
+python scripts/import_whitelist.py students.csv --column username
+```
+
+The importer lowercases usernames, validates GitHub username format, removes
+duplicates, and writes `data/whitelist.json`. Invalid usernames are skipped.
+
+GitHub Classroom assignment sync does not import the full roster. Keep whitelist
+management separate.
+
+## Run Locally
+
+```bash
+pip install -r requirements.txt
+python run.py
+```
+
+Open:
+
+```text
+http://127.0.0.1:8000
+```
+
+## Deploy On Render
+
+1. Create a new Render web service from this repository.
+2. Set the build command:
+
+```bash
+pip install -r requirements.txt
+```
+
+3. Set the start command:
+
+```bash
+uvicorn app.main:app --host 0.0.0.0 --port $PORT
+```
+
+4. Add the required environment variables in Render's dashboard.
+5. Add `GITHUB_CLASSROOM_TOKEN` only if you plan to run sync commands in that
+   environment.
+
+## Test With One Student Repo
+
+1. Pick one assignment from `data/assignments.json`.
+2. Confirm the assignment `slug` matches the Classroom repository prefix.
+3. Add one test GitHub username to `data/whitelist.json`.
+4. Confirm the expected repository exists:
+
+```text
+{assignment.slug}-{github_username}
+```
+
+5. Start the app and submit that username and assignment.
+6. A `201` response from GitHub means an invitation was created.
+7. A `204` response means the collaborator already has access or access was
+   updated.
+
+If the request fails, confirm the app is installed on the correct organization
+and has repository administration permission.
