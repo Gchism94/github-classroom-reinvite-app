@@ -29,8 +29,10 @@ Student repositories are constructed as:
 ## Instructor Scripts
 
 ```bash
+python scripts/list_classrooms.py
 python scripts/sync_classroom.py
 python scripts/sync_classroom.py --dry-run
+python scripts/sync_classroom.py --include-accepted
 python scripts/import_whitelist.py students.csv
 python scripts/view_logs.py
 ```

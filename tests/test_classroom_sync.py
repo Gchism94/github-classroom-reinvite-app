@@ -12,7 +12,11 @@ def test_normalize_classroom_assignment_keeps_required_import_fields():
         "title": "Homework 03",
         "slug": "hw-03",
         "invite_link": "https://classroom.github.com/a/example",
+        "type": "individual",
         "deadline": "2026-05-01T23:59:00Z",
+        "accepted": 14,
+        "submitted": 9,
+        "passing": 7,
         "extra": "ignored",
     }
 
@@ -21,7 +25,11 @@ def test_normalize_classroom_assignment_keeps_required_import_fields():
         "title": "Homework 03",
         "slug": "hw-03",
         "invite_link": "https://classroom.github.com/a/example",
+        "type": "individual",
         "deadline": "2026-05-01T23:59:00Z",
+        "accepted": 14,
+        "submitted": 9,
+        "passing": 7,
     }
 
 
@@ -84,16 +92,53 @@ def test_sync_classroom_dry_run_does_not_save(monkeypatch):
                     "title": "Homework 03",
                     "slug": "hw-03",
                     "invite_link": None,
+                    "type": "individual",
                     "deadline": None,
+                    "accepted": 1,
+                    "submitted": 0,
+                    "passing": 0,
                 }
             ]
 
         def list_accepted_assignments(self, assignment_id):
             return []
 
-    monkeypatch.setattr(sync_classroom, "get_settings", lambda: type("Settings", (), {"github_classroom_id": "999"})())
+    monkeypatch.setattr(sync_classroom, "get_settings", lambda: type("Settings", (), {"github_classroom_id": "999", "github_classroom_token": "token"})())
     monkeypatch.setattr(sync_classroom, "GitHubClassroomClient", FakeClient)
     monkeypatch.setattr(sync_classroom, "save_assignments", lambda assignments: (_ for _ in ()).throw(AssertionError("should not save assignments")))
     monkeypatch.setattr(sync_classroom, "save_accepted_assignments", lambda payload: (_ for _ in ()).throw(AssertionError("should not save accepted assignments")))
 
     sync_classroom.sync_classroom(None, dry_run=True)
+
+
+def test_sync_classroom_only_fetches_accepted_when_requested(monkeypatch):
+    class FakeClient:
+        def __init__(self, settings):
+            pass
+
+        def list_assignments(self, classroom_id):
+            return [
+                {
+                    "id": 123,
+                    "title": "Homework 03",
+                    "slug": "hw-03",
+                    "invite_link": None,
+                    "type": "individual",
+                    "deadline": None,
+                    "accepted": 1,
+                    "submitted": 0,
+                    "passing": 0,
+                }
+            ]
+
+        def list_accepted_assignments(self, assignment_id):
+            raise AssertionError("accepted assignments should not be fetched")
+
+    saved = {}
+    monkeypatch.setattr(sync_classroom, "get_settings", lambda: type("Settings", (), {"github_classroom_id": "999", "github_classroom_token": "token"})())
+    monkeypatch.setattr(sync_classroom, "GitHubClassroomClient", FakeClient)
+    monkeypatch.setattr(sync_classroom, "save_assignments", lambda assignments: saved.update({"assignments": assignments}))
+
+    sync_classroom.sync_classroom(None)
+
+    assert saved["assignments"][0]["slug"] == "hw-03"

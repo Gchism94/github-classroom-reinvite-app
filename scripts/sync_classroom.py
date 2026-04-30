@@ -31,9 +31,9 @@ def parse_args() -> argparse.Namespace:
         help="GitHub Classroom ID. Defaults to GITHUB_CLASSROOM_ID.",
     )
     parser.add_argument(
-        "--skip-accepted",
+        "--include-accepted",
         action="store_true",
-        help="Only sync assignment metadata, not accepted assignment repositories.",
+        help="Also fetch accepted assignments into data/accepted_assignments.json.",
     )
     parser.add_argument(
         "--dry-run",
@@ -43,40 +43,23 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def resolve_classroom_id(
-    client: GitHubClassroomClient, configured_classroom_id: str | None
-) -> str:
+def resolve_classroom_id(configured_classroom_id: str | None) -> str:
     if configured_classroom_id:
         return configured_classroom_id
 
-    classrooms = client.list_classrooms()
-    if len(classrooms) == 1:
-        classroom_id = classrooms[0].get("id")
-        if classroom_id:
-            print(f"Using classroom {classroom_id}: {classrooms[0].get('name')}")
-            return str(classroom_id)
-
-    if classrooms:
-        print("Multiple classrooms found. Re-run with --classroom-id or set GITHUB_CLASSROOM_ID.")
-        for classroom in classrooms:
-            print(f"- {classroom.get('id')}: {classroom.get('name')}")
-    else:
-        print("No classrooms were returned for the configured token.")
-
-    raise SystemExit(1)
+    raise GitHubClassroomError(
+        "Missing GITHUB_CLASSROOM_ID. Run scripts/list_classrooms.py to find it."
+    )
 
 
 def sync_classroom(
     classroom_id: str | None,
-    skip_accepted: bool = False,
+    include_accepted: bool = False,
     dry_run: bool = False,
 ) -> None:
     settings = get_settings()
     client = GitHubClassroomClient(settings=settings)
-    classroom_id = resolve_classroom_id(
-        client,
-        classroom_id or settings.github_classroom_id,
-    )
+    classroom_id = resolve_classroom_id(classroom_id or settings.github_classroom_id)
 
     raw_assignments = client.list_assignments(classroom_id)
     assignments = [
@@ -94,7 +77,7 @@ def sync_classroom(
         save_assignments(assignments)
         print(f"Saved {len(assignments)} assignments to data/assignments.json.")
 
-    if skip_accepted:
+    if not include_accepted:
         return
 
     accepted_by_assignment: dict[str, list[dict]] = {}
@@ -128,7 +111,7 @@ def main() -> None:
     try:
         sync_classroom(
             args.classroom_id,
-            skip_accepted=args.skip_accepted,
+            include_accepted=args.include_accepted,
             dry_run=args.dry_run,
         )
     except GitHubClassroomError as exc:

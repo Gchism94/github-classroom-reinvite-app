@@ -6,35 +6,44 @@ from scripts.import_whitelist import extract_usernames
 def test_extract_usernames_normalizes_validates_and_deduplicates(tmp_path: Path):
     csv_path = tmp_path / "students.csv"
     csv_path.write_text(
-        "name,github_username\n"
-        "Octo, OctoCat \n"
-        "Duplicate,octocat\n"
-        "Bad,bad/name\n"
-        "Hyphen,-bad\n"
-        "Student,student-1\n"
+        "identifier,github_username,github_id,name\n"
+        "1, OctoCat ,100,Octo\n"
+        "2,octocat,101,Duplicate\n"
+        "3,bad/name,102,Bad\n"
+        "4,-bad,103,Hyphen\n"
+        "5,student-1,104,Student\n"
+        "6,,105,Missing\n"
     )
 
-    usernames, rejected = extract_usernames(csv_path, "github_username")
+    result = extract_usernames(csv_path)
 
-    assert usernames == ["octocat", "student-1"]
-    assert rejected == ["bad/name", "-bad"]
+    assert result.usernames == ["octocat", "student-1"]
+    assert result.total_rows == 6
+    assert result.skipped_rows == 3
+    assert result.duplicates_removed == 1
 
 
-def test_extract_usernames_falls_back_to_first_column(tmp_path: Path):
+def test_extract_usernames_requires_github_username_column(tmp_path: Path):
     csv_path = tmp_path / "students.csv"
     csv_path.write_text("username,email\nMonaLisa,monalisa@example.edu\n")
 
-    usernames, rejected = extract_usernames(csv_path, "github_username")
+    try:
+        extract_usernames(csv_path)
+    except ValueError as exc:
+        assert "github_username" in str(exc)
+    else:
+        raise AssertionError("Expected missing github_username column to fail")
 
-    assert usernames == ["monalisa"]
-    assert rejected == []
 
-
-def test_extract_usernames_matches_header_case_insensitively(tmp_path: Path):
+def test_extract_usernames_sorts_alphabetically(tmp_path: Path):
     csv_path = tmp_path / "students.csv"
-    csv_path.write_text("Name,GitHub_Username\nStudent,OctoCat\n")
+    csv_path.write_text(
+        "identifier,github_username,github_id,name\n"
+        "1,Zebra,100,Z\n"
+        "2,alpha,101,A\n"
+        "3,MonaLisa,102,M\n"
+    )
 
-    usernames, rejected = extract_usernames(csv_path, "github_username")
+    result = extract_usernames(csv_path)
 
-    assert usernames == ["octocat"]
-    assert rejected == []
+    assert result.usernames == ["alpha", "monalisa", "zebra"]

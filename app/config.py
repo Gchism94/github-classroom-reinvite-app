@@ -20,6 +20,7 @@ class Settings(BaseModel):
     github_installation_id: str
     github_org: str
     github_private_key: Optional[str] = None
+    github_private_key_path: Optional[str] = None
     github_classroom_id: Optional[str] = None
     github_classroom_token: Optional[str] = None
 
@@ -28,7 +29,18 @@ class Settings(BaseModel):
         if self.github_private_key:
             return self.github_private_key.replace("\\n", "\n")
 
-        raise ConfigurationError("Missing required environment variable: GITHUB_PRIVATE_KEY")
+        if self.github_private_key_path:
+            key_path = Path(self.github_private_key_path)
+            if not key_path.exists():
+                raise ConfigurationError(
+                    f"GitHub private key file not found: {self.github_private_key_path}"
+                )
+            return key_path.read_text()
+
+        raise ConfigurationError(
+            "Missing required environment variable: GITHUB_PRIVATE_KEY or "
+            "GITHUB_PRIVATE_KEY_PATH"
+        )
 
     def validate_github_app_config(self) -> None:
         missing = [
@@ -37,10 +49,11 @@ class Settings(BaseModel):
                 ("GITHUB_APP_ID", self.github_app_id),
                 ("GITHUB_INSTALLATION_ID", self.github_installation_id),
                 ("GITHUB_ORG", self.github_org),
-                ("GITHUB_PRIVATE_KEY", self.github_private_key),
             )
             if not value
         ]
+        if not self.github_private_key and not self.github_private_key_path:
+            missing.append("GITHUB_PRIVATE_KEY or GITHUB_PRIVATE_KEY_PATH")
         if missing:
             raise ConfigurationError(
                 "Missing required environment variable(s): " + ", ".join(missing)
@@ -59,6 +72,7 @@ def get_settings() -> Settings:
         github_installation_id=os.getenv("GITHUB_INSTALLATION_ID", ""),
         github_org=os.getenv("GITHUB_ORG", ""),
         github_private_key=os.getenv("GITHUB_PRIVATE_KEY"),
+        github_private_key_path=os.getenv("GITHUB_PRIVATE_KEY_PATH"),
         github_classroom_id=os.getenv("GITHUB_CLASSROOM_ID"),
         github_classroom_token=os.getenv("GITHUB_CLASSROOM_TOKEN"),
     )

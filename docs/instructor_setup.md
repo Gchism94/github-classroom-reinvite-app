@@ -68,6 +68,14 @@ tokens.
 
 GitHub Classroom assignment sync is run from a script:
 
+First list classrooms to find the ID:
+
+```bash
+python scripts/list_classrooms.py
+```
+
+Set `GITHUB_CLASSROOM_ID` in `.env`, then run:
+
 ```bash
 python scripts/sync_classroom.py
 ```
@@ -85,7 +93,11 @@ Each imported assignment includes:
 - `title`
 - `slug`
 - `invite_link`
+- `type`
 - `deadline`
+- `accepted`
+- `submitted`
+- `passing`
 
 The app uses `slug` as the repository prefix, so a student repo is constructed
 as:
@@ -98,13 +110,17 @@ The sync script also supports:
 
 ```bash
 python scripts/sync_classroom.py --classroom-id 123456
-python scripts/sync_classroom.py --skip-accepted
 python scripts/sync_classroom.py --dry-run
+python scripts/sync_classroom.py --include-accepted
 ```
 
-GitHub's Classroom REST endpoints are user-context endpoints. If your GitHub App
-installation token cannot access them, set `GITHUB_CLASSROOM_TOKEN` to a token
-for a classroom admin. The script never prints the token.
+Use `--include-accepted` to also call
+`GET /assignments/{assignment_id}/accepted_assignments` for each assignment and
+write `data/accepted_assignments.json`.
+
+GitHub's Classroom REST endpoints are user-context endpoints. Set
+`GITHUB_CLASSROOM_TOKEN` to a token for a classroom admin. The scripts never
+print the token.
 
 ## View Audit Logs
 

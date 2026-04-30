@@ -5,8 +5,7 @@ from typing import Any
 
 import requests
 
-from app.config import DATA_DIR, ConfigurationError, Settings, get_settings
-from app.github_app import GitHubAppAuthError, get_installation_token
+from app.config import DATA_DIR, Settings, get_settings
 
 GITHUB_API_BASE = "https://api.github.com"
 
@@ -24,13 +23,9 @@ class GitHubClassroomClient:
         if self.settings.github_classroom_token:
             return self.settings.github_classroom_token
 
-        try:
-            return get_installation_token(self.settings)
-        except (ConfigurationError, GitHubAppAuthError) as exc:
-            raise GitHubClassroomError(
-                "GitHub Classroom sync requires GITHUB_CLASSROOM_TOKEN unless "
-                "your token source can access Classroom user endpoints."
-            ) from exc
+        raise GitHubClassroomError(
+            "GitHub Classroom sync requires GITHUB_CLASSROOM_TOKEN."
+        )
 
     @property
     def headers(self) -> dict[str, str]:
@@ -95,7 +90,11 @@ def normalize_classroom_assignment(assignment: dict[str, Any]) -> dict[str, Any]
         "title": title if isinstance(title, str) and title.strip() else slug,
         "slug": slug,
         "invite_link": assignment.get("invite_link"),
+        "type": assignment.get("type"),
         "deadline": assignment.get("deadline"),
+        "accepted": assignment.get("accepted"),
+        "submitted": assignment.get("submitted"),
+        "passing": assignment.get("passing"),
     }
 
 

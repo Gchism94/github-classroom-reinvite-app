@@ -30,7 +30,11 @@ def _normalize_assignment_record(assignment: Any) -> dict[str, Any] | None:
         "title": title if isinstance(title, str) and title.strip() else slug.strip(),
         "slug": slug.strip(),
         "invite_link": assignment.get("invite_link"),
+        "type": assignment.get("type"),
         "deadline": assignment.get("deadline"),
+        "accepted": assignment.get("accepted"),
+        "submitted": assignment.get("submitted"),
+        "passing": assignment.get("passing"),
     }
 
 

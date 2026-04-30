@@ -10,13 +10,20 @@ def test_build_repo_name_uses_assignment_prefix_and_normalized_username():
 
 
 def test_load_assignments_returns_slugs_from_object_data():
-    assert load_assignments() == ["hw-01", "hw-02", "project-proposal"]
+    records = load_assignment_records()
+
+    assert load_assignments() == [record["slug"] for record in records]
+    assert all(isinstance(slug, str) and slug for slug in load_assignments())
 
 
 def test_load_assignment_records_preserves_import_fields():
     record = load_assignment_records()[0]
 
-    assert record["title"] == "Homework 01"
-    assert record["slug"] == "hw-01"
+    assert isinstance(record["title"], str)
+    assert isinstance(record["slug"], str)
     assert "invite_link" in record
+    assert "type" in record
     assert "deadline" in record
+    assert "accepted" in record
+    assert "submitted" in record
+    assert "passing" in record

@@ -5,6 +5,7 @@ import argparse
 import csv
 import json
 import sys
+from dataclasses import dataclass
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -17,74 +18,62 @@ from app.validation import is_valid_github_username, normalize_username  # noqa:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Import approved GitHub usernames from a CSV file."
+        description="Import approved GitHub usernames from a GitHub Classroom roster CSV."
     )
-    parser.add_argument("csv_path", help="Path to a CSV file with GitHub usernames.")
     parser.add_argument(
-        "--column",
-        default="github_username",
-        help=(
-            "Header name containing GitHub usernames. If the CSV has no matching "
-            "header, the first column is used."
-        ),
+        "csv_path",
+        help="Path to a GitHub Classroom roster CSV file.",
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Print usernames and summary without writing data/whitelist.json.",
     )
     return parser.parse_args()
 
 
-KNOWN_USERNAME_HEADERS = {
-    "github_username",
-    "github username",
-    "github",
-    "username",
-    "user",
-    "login",
-}
+@dataclass(frozen=True)
+class ImportResult:
+    usernames: list[str]
+    total_rows: int
+    skipped_rows: int
+    duplicates_removed: int
 
 
-def _looks_like_header(row: list[str], requested_column: str) -> bool:
-    normalized_cells = {cell.strip().lower() for cell in row}
-    return (
-        requested_column.strip().lower() in normalized_cells
-        or bool(normalized_cells & KNOWN_USERNAME_HEADERS)
-    )
-
-
-def extract_usernames(csv_path: Path, column: str) -> tuple[list[str], list[str]]:
-    valid_usernames: set[str] = set()
-    rejected: list[str] = []
+def extract_usernames(csv_path: Path) -> ImportResult:
+    raw_valid_usernames: list[str] = []
+    skipped_rows = 0
+    total_rows = 0
 
     with csv_path.open(newline="") as csv_file:
-        reader = csv.reader(csv_file)
-        rows = list(reader)
-
-        if not rows:
-            return [], []
-
-        first_row = rows[0]
-        if _looks_like_header(first_row, column):
-            header = [cell.strip() for cell in first_row]
-            lowercase_header = [cell.lower() for cell in header]
-            requested_column = column.strip().lower()
-            selected_index = (
-                lowercase_header.index(requested_column)
-                if requested_column in lowercase_header
-                else 0
+        reader = csv.DictReader(csv_file)
+        fieldnames = reader.fieldnames or []
+        if "github_username" not in fieldnames:
+            raise ValueError(
+                "Missing required CSV column: github_username. Expected columns "
+                "include identifier, github_username, github_id, name."
             )
-            username_values = (
-                row[selected_index] if len(row) > selected_index else ""
-                for row in rows[1:]
-            )
-        else:
-            username_values = (row[0] if row else "" for row in rows)
 
-        for raw_username in username_values:
-            username = normalize_username(raw_username)
+        for row in reader:
+            total_rows += 1
+            username = normalize_username(row.get("github_username", ""))
+            if not username:
+                skipped_rows += 1
+                continue
+
             if is_valid_github_username(username):
-                valid_usernames.add(username)
-            elif username:
-                rejected.append(username)
+                raw_valid_usernames.append(username)
+            else:
+                skipped_rows += 1
 
-    return sorted(valid_usernames), rejected
+    usernames = sorted(set(raw_valid_usernames))
+    duplicates_removed = len(raw_valid_usernames) - len(usernames)
+    return ImportResult(
+        usernames=usernames,
+        total_rows=total_rows,
+        skipped_rows=skipped_rows,
+        duplicates_removed=duplicates_removed,
+    )
 
 
 def save_whitelist(usernames: list[str]) -> None:
@@ -100,12 +89,24 @@ def main() -> None:
         print(f"CSV file not found: {csv_path}", file=sys.stderr)
         raise SystemExit(1)
 
-    usernames, rejected = extract_usernames(csv_path, args.column)
-    save_whitelist(usernames)
+    try:
+        result = extract_usernames(csv_path)
+    except ValueError as exc:
+        print(str(exc), file=sys.stderr)
+        raise SystemExit(1) from exc
 
-    print(f"Saved {len(usernames)} usernames to data/whitelist.json.")
-    if rejected:
-        print(f"Skipped {len(rejected)} invalid username(s).", file=sys.stderr)
+    print(f"Total rows: {result.total_rows}")
+    print(f"Valid usernames: {len(result.usernames)}")
+    print(f"Skipped rows: {result.skipped_rows}")
+    print(f"Duplicates removed: {result.duplicates_removed}")
+
+    if args.dry_run:
+        print(json.dumps(result.usernames, indent=2) + "\n")
+        print("Dry run: no files written.")
+        return
+
+    save_whitelist(result.usernames)
+    print("Saved usernames to data/whitelist.json.")
 
 
 if __name__ == "__main__":
