@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>GitHub Classroom Access Restore</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/styles.css') }}">
+  </head>
+  <body>
+    <main class="page">
+      <section class="intro">
+        <p class="eyebrow">GitHub Classroom</p>
+        <h1>Restore repository write access</h1>
+        <p>
+          Use this tool if your instructor has approved you for an assignment
+          repository but your GitHub Classroom invitation expired, failed, or
+          did not grant write access.
+        </p>
+      </section>
+
+      <form method="post" action="/" class="request-form">
+        <div class="field">
+          <label for="username">GitHub username</label>
+          <input
+            id="username"
+            name="username"
+            required
+            autocomplete="username"
+            placeholder="octocat"
+            value="{{ username | default('', true) }}"
+          >
+        </div>
+
+        <div class="field">
+          <label for="assignment">Assignment</label>
+          <select id="assignment" name="assignment" required>
+            {% for assignment in assignments %}
+              <option
+                value="{{ assignment }}"
+                {% if assignment == selected_assignment %}selected{% endif %}
+              >
+                {{ assignment }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <button type="submit">Request write access</button>
+      </form>
+
+      {% if success %}
+        <div class="message success" role="status">
+          <strong>Success.</strong> {{ success }} Repository: <code>{{ repo }}</code>
+        </div>
+      {% endif %}
+
+      {% if error %}
+        <div class="message error" role="alert">
+          <strong>Request not completed.</strong> {{ error }}
+        </div>
+      {% endif %}
+    </main>
+  </body>
+</html>

@@ -7,3 +7,4 @@ PyJWT[crypto]
 pydantic
 pytest
 httpx
+jinja2

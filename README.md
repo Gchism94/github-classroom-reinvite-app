@@ -1,6 +1,7 @@
 # GitHub Classroom Reinvite Tool
 
-A lightweight FastAPI app that lets authorized students restore write access to their GitHub Classroom repositories using a GitHub App installation.
+A lightweight FastAPI web app that lets approved students restore write access
+to GitHub Classroom repositories using a GitHub App installation token.
 
 ## Why GitHub App instead of a PAT?
 
@@ -29,7 +30,7 @@ Example:
 hw-01-octocat
 ```
 
-## Local setup
+## Local Setup
 
 ```bash
 git clone https://github.com/YOUR_ORG/github-classroom-reinvite-app.git
@@ -40,7 +41,8 @@ pip install -r requirements.txt
 cp .env.example .env
 ```
 
-Edit `.env` and add your GitHub App credentials.
+Edit `.env` and add your GitHub App credentials. The private key must stay
+server-side and can be pasted as a quoted value with `\n` line breaks.
 
 Then run:
 
@@ -63,13 +65,9 @@ Required:
 - `GITHUB_APP_ID`
 - `GITHUB_INSTALLATION_ID`
 - `GITHUB_ORG`
-- `GITHUB_PRIVATE_KEY_PATH` or `GITHUB_PRIVATE_KEY`
+- `GITHUB_PRIVATE_KEY`
 
-Recommended:
-
-- `APP_SECRET_KEY`
-
-## GitHub App permissions
+## GitHub App Permissions
 
 Create a GitHub App with the minimum permissions needed to invite collaborators to repositories.
 
@@ -134,8 +132,26 @@ Response:
 - Never commit `.env` or private keys.
 - Keep the private key server-side only.
 - Keep the whitelist explicit.
+- This app intentionally does not implement GitHub OAuth yet; students enter
+  their GitHub username and the server checks `data/whitelist.json`.
 - Consider adding GitHub OAuth later so users cannot claim another whitelisted username.
 - Use rate limiting before public deployment.
+
+## Deploying
+
+For Render or similar services, use:
+
+```bash
+uvicorn app.main:app --host 0.0.0.0 --port $PORT
+```
+
+Set the four required GitHub environment variables in the service dashboard.
+
+## Tests
+
+```bash
+pytest
+```
 
 ## Roadmap ideas
 

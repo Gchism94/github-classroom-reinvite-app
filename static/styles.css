@@ -1,0 +1,152 @@
+:root {
+  color-scheme: light;
+  --bg: #f6f8fa;
+  --panel: #ffffff;
+  --text: #1f2328;
+  --muted: #57606a;
+  --border: #d0d7de;
+  --accent: #1f6feb;
+  --accent-strong: #0a53be;
+  --success-bg: #dafbe1;
+  --success-border: #4ac26b;
+  --error-bg: #ffebe9;
+  --error-border: #ff8182;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  line-height: 1.5;
+}
+
+.page {
+  width: min(100% - 32px, 720px);
+  margin: 0 auto;
+  padding: 56px 0;
+}
+
+.intro {
+  margin-bottom: 24px;
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+h1 {
+  margin: 0 0 12px;
+  font-size: 2rem;
+  line-height: 1.15;
+  letter-spacing: 0;
+}
+
+.intro p:last-child {
+  margin: 0;
+  max-width: 62ch;
+  color: var(--muted);
+}
+
+.request-form {
+  display: grid;
+  gap: 18px;
+  padding: 24px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 8px 30px rgba(31, 35, 40, 0.06);
+}
+
+.field {
+  display: grid;
+  gap: 8px;
+}
+
+label {
+  font-weight: 700;
+}
+
+input,
+select,
+button {
+  width: 100%;
+  min-height: 44px;
+  border-radius: 6px;
+  font: inherit;
+}
+
+input,
+select {
+  border: 1px solid var(--border);
+  padding: 10px 12px;
+  background: #ffffff;
+  color: var(--text);
+}
+
+input:focus,
+select:focus,
+button:focus {
+  outline: 3px solid rgba(31, 111, 235, 0.2);
+  outline-offset: 2px;
+}
+
+button {
+  border: 0;
+  padding: 10px 16px;
+  background: var(--accent);
+  color: #ffffff;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+button:hover {
+  background: var(--accent-strong);
+}
+
+.message {
+  margin-top: 18px;
+  padding: 14px 16px;
+  border-left: 4px solid;
+  border-radius: 6px;
+  background: var(--panel);
+}
+
+.success {
+  border-color: var(--success-border);
+  background: var(--success-bg);
+}
+
+.error {
+  border-color: var(--error-border);
+  background: var(--error-bg);
+}
+
+code {
+  font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+  font-size: 0.95em;
+}
+
+@media (max-width: 520px) {
+  .page {
+    width: min(100% - 24px, 720px);
+    padding: 32px 0;
+  }
+
+  h1 {
+    font-size: 1.65rem;
+  }
+
+  .request-form {
+    padding: 18px;
+  }
+}
