@@ -11,6 +11,7 @@ A GitHub App is safer and more publishable than a personal access token because 
 
 - Whitelist-based student access
 - Assignment dropdown / API selection
+- GitHub Classroom assignment sync for instructors
 - GitHub App authentication using a private key
 - Server-side collaborator invitation with write access
 - JSON-configurable assignments and whitelist
@@ -67,6 +68,17 @@ Required:
 - `GITHUB_ORG`
 - `GITHUB_PRIVATE_KEY`
 
+Optional for GitHub Classroom sync:
+
+- `GITHUB_CLASSROOM_ID`
+- `GITHUB_CLASSROOM_TOKEN`
+
+The repository collaborator reinvite flow uses a GitHub App installation token.
+The GitHub Classroom REST endpoints are user-context endpoints in GitHub's
+documentation and support GitHub App user access tokens or fine-grained personal
+access tokens. Set `GITHUB_CLASSROOM_TOKEN` to a token for a classroom admin when
+running the sync script.
+
 ## GitHub App Permissions
 
 Create a GitHub App with the minimum permissions needed to invite collaborators to repositories.
@@ -101,11 +113,67 @@ Example `assignments.json`:
 
 ```json
 [
-  "hw-01",
-  "hw-02",
-  "project-proposal"
+  {
+    "id": 123,
+    "title": "Homework 01",
+    "slug": "hw-01",
+    "invite_link": "https://classroom.github.com/a/example",
+    "deadline": "2026-05-01T23:59:00Z"
+  }
 ]
 ```
+
+`slug` is used as the repository prefix, so the app constructs repository names
+as:
+
+```text
+{assignment.slug}-{github_username}
+```
+
+`data/accepted_assignments.json` stores accepted Classroom assignment repository
+metadata from the sync script. It is not used as the whitelist.
+
+## Syncing GitHub Classroom assignments
+
+Set `GITHUB_CLASSROOM_TOKEN` in `.env`. If you know the classroom ID, also set
+`GITHUB_CLASSROOM_ID`:
+
+```bash
+GITHUB_CLASSROOM_ID=123456
+GITHUB_CLASSROOM_TOKEN=github_pat_or_app_user_token
+```
+
+Then run:
+
+```bash
+python scripts/sync_classroom.py
+```
+
+The script fetches:
+
+- `GET /classrooms`
+- `GET /classrooms/{classroom_id}/assignments`
+- `GET /assignments/{assignment_id}/accepted_assignments`
+
+It writes imported assignments to `data/assignments.json` and accepted
+assignment repositories to `data/accepted_assignments.json`.
+
+If `GITHUB_CLASSROOM_ID` is not configured and the token can access exactly one
+classroom, that classroom is used. If multiple classrooms are returned, the
+script prints their IDs and exits; re-run it with:
+
+```bash
+python scripts/sync_classroom.py --classroom-id 123456
+```
+
+To skip accepted-assignment fetching:
+
+```bash
+python scripts/sync_classroom.py --skip-accepted
+```
+
+GitHub Classroom does not expose the full roster through these assignment sync
+endpoints. Keep approved student access separate in `data/whitelist.json`.
 
 ## API usage
 

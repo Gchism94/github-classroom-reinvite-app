@@ -2,7 +2,7 @@ from fastapi import APIRouter, Form, HTTPException, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
-from app.assignments import build_repo_name, load_assignments
+from app.assignments import build_repo_name, load_assignment_records, load_assignments
 from app.auth import is_authorized
 from app.config import BASE_DIR, ConfigurationError
 from app.github_app import GitHubAppAuthError
@@ -57,7 +57,7 @@ def reinvite_user(
 def index(request: Request):
     return templates.TemplateResponse(
         "index.html",
-        {"request": request, "assignments": load_assignments()},
+        {"request": request, "assignments": load_assignment_records()},
     )
 
 
@@ -69,7 +69,7 @@ def submit_reinvite(
 ):
     context = {
         "request": request,
-        "assignments": load_assignments(),
+        "assignments": load_assignment_records(),
         "selected_assignment": assignment,
         "username": username,
     }

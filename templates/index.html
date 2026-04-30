@@ -35,11 +35,13 @@
           <label for="assignment">Assignment</label>
           <select id="assignment" name="assignment" required>
             {% for assignment in assignments %}
+              {% set value = assignment.slug if assignment.slug is defined else assignment %}
+              {% set label = assignment.title if assignment.title is defined else assignment %}
               <option
-                value="{{ assignment }}"
-                {% if assignment == selected_assignment %}selected{% endif %}
+                value="{{ value }}"
+                {% if value == selected_assignment %}selected{% endif %}
               >
-                {{ assignment }}
+                {{ label }}
               </option>
             {% endfor %}
           </select>

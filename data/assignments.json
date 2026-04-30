@@ -1,5 +1,23 @@
 [
-  "hw-01",
-  "hw-02",
-  "project-proposal"
+  {
+    "id": null,
+    "title": "Homework 01",
+    "slug": "hw-01",
+    "invite_link": null,
+    "deadline": null
+  },
+  {
+    "id": null,
+    "title": "Homework 02",
+    "slug": "hw-02",
+    "invite_link": null,
+    "deadline": null
+  },
+  {
+    "id": null,
+    "title": "Project Proposal",
+    "slug": "project-proposal",
+    "invite_link": null,
+    "deadline": null
+  }
 ]

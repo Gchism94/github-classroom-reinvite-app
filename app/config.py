@@ -20,6 +20,8 @@ class Settings(BaseModel):
     github_installation_id: str
     github_org: str
     github_private_key: Optional[str] = None
+    github_classroom_id: Optional[str] = None
+    github_classroom_token: Optional[str] = None
 
     @property
     def private_key(self) -> str:
@@ -56,4 +58,6 @@ def get_settings() -> Settings:
         github_installation_id=os.getenv("GITHUB_INSTALLATION_ID", ""),
         github_org=os.getenv("GITHUB_ORG", ""),
         github_private_key=os.getenv("GITHUB_PRIVATE_KEY"),
+        github_classroom_id=os.getenv("GITHUB_CLASSROOM_ID"),
+        github_classroom_token=os.getenv("GITHUB_CLASSROOM_TOKEN"),
     )
