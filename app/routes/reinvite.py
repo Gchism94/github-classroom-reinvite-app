@@ -130,8 +130,11 @@ def reinvite_user(
 @router.get("/", response_class=HTMLResponse)
 def index(request: Request):
     return templates.TemplateResponse(
+        request,
         "index.html",
-        {"request": request, "assignments": load_assignment_records()},
+        {
+            "assignments": load_assignment_records(),
+        },
     )
 
 
@@ -147,6 +150,7 @@ def submit_reinvite(
         "selected_assignment": assignment,
         "username": username,
     }
+
     try:
         result = reinvite_user(username, assignment)
         context["success"] = result.status
@@ -154,8 +158,11 @@ def submit_reinvite(
     except HTTPException as exc:
         context["error"] = exc.detail
 
-    return templates.TemplateResponse("index.html", context)
-
+    return templates.TemplateResponse(
+        request,
+        "index.html",
+        context,
+    )
 
 @router.get("/api/assignments", response_model=AssignmentListResponse)
 def get_assignments():
