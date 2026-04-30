@@ -30,7 +30,9 @@ Student repositories are constructed as:
 
 ```bash
 python scripts/sync_classroom.py
+python scripts/sync_classroom.py --dry-run
 python scripts/import_whitelist.py students.csv
+python scripts/view_logs.py
 ```
 
 Assignments live in `data/assignments.json`. Approved GitHub usernames live in

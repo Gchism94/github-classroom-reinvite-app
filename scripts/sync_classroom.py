@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from pathlib import Path
 
@@ -34,6 +35,11 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Only sync assignment metadata, not accepted assignment repositories.",
     )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Fetch and print data without writing JSON files.",
+    )
     return parser.parse_args()
 
 
@@ -60,7 +66,11 @@ def resolve_classroom_id(
     raise SystemExit(1)
 
 
-def sync_classroom(classroom_id: str | None, skip_accepted: bool = False) -> None:
+def sync_classroom(
+    classroom_id: str | None,
+    skip_accepted: bool = False,
+    dry_run: bool = False,
+) -> None:
     settings = get_settings()
     client = GitHubClassroomClient(settings=settings)
     classroom_id = resolve_classroom_id(
@@ -77,8 +87,12 @@ def sync_classroom(classroom_id: str | None, skip_accepted: bool = False) -> Non
         )
         if assignment["id"] and assignment["slug"]
     ]
-    save_assignments(assignments)
-    print(f"Saved {len(assignments)} assignments to data/assignments.json.")
+    if dry_run:
+        print(json.dumps({"assignments": assignments}, indent=2, sort_keys=True))
+        print(f"Dry run: fetched {len(assignments)} assignments; no files written.")
+    else:
+        save_assignments(assignments)
+        print(f"Saved {len(assignments)} assignments to data/assignments.json.")
 
     if skip_accepted:
         return
@@ -96,20 +110,27 @@ def sync_classroom(classroom_id: str | None, skip_accepted: bool = False) -> Non
             f"for {assignment['slug']}."
         )
 
-    save_accepted_assignments(
-        build_accepted_assignments_payload(
-            assignments,
-            accepted_by_assignment,
-            classroom_id,
-        )
+    accepted_payload = build_accepted_assignments_payload(
+        assignments,
+        accepted_by_assignment,
+        classroom_id,
     )
-    print("Saved accepted assignments to data/accepted_assignments.json.")
+    if dry_run:
+        print(json.dumps(accepted_payload, indent=2, sort_keys=True))
+        print("Dry run: accepted assignments fetched; no files written.")
+    else:
+        save_accepted_assignments(accepted_payload)
+        print("Saved accepted assignments to data/accepted_assignments.json.")
 
 
 def main() -> None:
     args = parse_args()
     try:
-        sync_classroom(args.classroom_id, skip_accepted=args.skip_accepted)
+        sync_classroom(
+            args.classroom_id,
+            skip_accepted=args.skip_accepted,
+            dry_run=args.dry_run,
+        )
     except GitHubClassroomError as exc:
         print(f"Classroom sync failed: {exc}", file=sys.stderr)
         raise SystemExit(1) from exc

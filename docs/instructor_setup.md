@@ -99,11 +99,32 @@ The sync script also supports:
 ```bash
 python scripts/sync_classroom.py --classroom-id 123456
 python scripts/sync_classroom.py --skip-accepted
+python scripts/sync_classroom.py --dry-run
 ```
 
 GitHub's Classroom REST endpoints are user-context endpoints. If your GitHub App
 installation token cannot access them, set `GITHUB_CLASSROOM_TOKEN` to a token
 for a classroom admin. The script never prints the token.
+
+## View Audit Logs
+
+Student reinvite requests append safe JSON lines to:
+
+```text
+logs/audit.log
+```
+
+Each entry includes timestamp, username, assignment, repo, status, GitHub HTTP
+status, and a safe message. Tokens, private keys, and raw GitHub API responses
+are not logged.
+
+Read recent entries with:
+
+```bash
+python scripts/view_logs.py
+python scripts/view_logs.py --limit 100
+python scripts/view_logs.py --json
+```
 
 ## Import Or Update The Whitelist
 
