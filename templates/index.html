@@ -8,59 +8,67 @@
   </head>
   <body>
     <main class="page">
-      <section class="intro">
-        <p class="eyebrow">GitHub Classroom</p>
-        <h1>Restore repository write access</h1>
-        <p>
+      <section class="hero" aria-labelledby="page-title">
+        <p class="eyebrow">GitHub Classroom Access</p>
+        <h1 id="page-title">Restore repository write access</h1>
+        <p class="subtitle">
           Use this tool if your instructor has approved you for an assignment
           repository but your GitHub Classroom invitation expired, failed, or
           did not grant write access.
         </p>
       </section>
 
-      <form method="post" action="/" class="request-form">
-        <div class="field">
-          <label for="username">GitHub username</label>
-          <input
-            id="username"
-            name="username"
-            required
-            autocomplete="username"
-            placeholder="octocat"
-            value="{{ username | default('', true) }}"
-          >
-        </div>
+      <section class="form-card" aria-label="Repository access request">
+        <form method="post" action="/" class="request-form">
+          <div class="field">
+            <label for="username">GitHub username</label>
+            <input
+              id="username"
+              name="username"
+              required
+              autocomplete="username"
+              placeholder="octocat"
+              value="{{ username | default('', true) }}"
+            >
+          </div>
 
-        <div class="field">
-          <label for="assignment">Assignment</label>
-          <select id="assignment" name="assignment" required>
-            {% for assignment in assignments %}
-              {% set value = assignment.slug if assignment.slug is defined else assignment %}
-              {% set label = assignment.title if assignment.title is defined else assignment %}
-              <option
-                value="{{ value }}"
-                {% if value == selected_assignment %}selected{% endif %}
-              >
-                {{ label }}
-              </option>
-            {% endfor %}
-          </select>
-        </div>
+          <div class="field">
+            <label for="assignment">Assignment</label>
+            <select id="assignment" name="assignment" required>
+              {% for assignment in assignments %}
+                {% set value = assignment.slug if assignment.slug is defined else assignment %}
+                {% set label = assignment.title if assignment.title is defined else assignment %}
+                <option
+                  value="{{ value }}"
+                  {% if value == selected_assignment %}selected{% endif %}
+                >
+                  {{ label }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
 
-        <button type="submit">Request write access</button>
-      </form>
+          <button type="submit">Request write access</button>
+        </form>
+      </section>
 
       {% if success %}
-        <div class="message success" role="status">
-          <strong>Success.</strong> {{ success }} Repository: <code>{{ repo }}</code>
+        <div class="alert alert-success" role="status">
+          <strong>Success.</strong>
+          <span>{{ success }} Repository: <code>{{ repo }}</code></span>
         </div>
       {% endif %}
 
       {% if error %}
-        <div class="message error" role="alert">
-          <strong>Request not completed.</strong> {{ error }}
+        <div class="alert alert-error" role="alert">
+          <strong>Request not completed.</strong>
+          <span>{{ error }}</span>
         </div>
       {% endif %}
+
+      <footer class="footer-note">
+        For course repository access only.
+      </footer>
     </main>
   </body>
 </html>
