@@ -2,5 +2,6 @@
 __pycache__/
 .pytest_cache/
 logs/*.log
+reports/*.json
 *.pem
 classroom_roster.csv

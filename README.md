@@ -34,11 +34,18 @@ python scripts/sync_classroom.py
 python scripts/sync_classroom.py --dry-run
 python scripts/sync_classroom.py --include-accepted
 python scripts/import_whitelist.py students.csv
+python scripts/validate_repos.py --assignment hw-01
+python scripts/batch_reinvite.py --assignment hw-01 --limit 2 --dry-run
+python scripts/batch_reinvite.py --assignment hw-01 --skip-missing
 python scripts/view_logs.py
 ```
 
 Assignments live in `data/assignments.json`. Approved GitHub usernames live in
 `data/whitelist.json`. Do not put secrets in JSON files.
+
+Instructor utilities cover syncing classroom assignments, importing a GitHub
+Classroom roster, validating expected repositories, and batch reinviting
+students for one assignment at a time.
 
 ## Deployment
 

@@ -122,6 +122,44 @@ GitHub's Classroom REST endpoints are user-context endpoints. Set
 `GITHUB_CLASSROOM_TOKEN` to a token for a classroom admin. The scripts never
 print the token.
 
+## Instructor Workflow
+
+Use this script-only workflow for v1.
+
+A. Sync assignments:
+
+```bash
+python scripts/sync_classroom.py
+```
+
+B. Import roster:
+
+```bash
+python scripts/import_whitelist.py classroom_roster.csv
+```
+
+C. Validate repos:
+
+```bash
+python scripts/validate_repos.py --assignment hw-01
+```
+
+D. Batch reinvite small test:
+
+```bash
+python scripts/batch_reinvite.py --assignment hw-01 --limit 2 --dry-run
+```
+
+E. Batch reinvite:
+
+```bash
+python scripts/batch_reinvite.py --assignment hw-01 --skip-missing
+```
+
+`batch_reinvite.py` requires `--assignment` so it cannot accidentally process
+all assignments. Use `--limit` for small tests and `--dry-run` to preview
+without changing GitHub.
+
 ## View Audit Logs
 
 Student reinvite requests append safe JSON lines to:
