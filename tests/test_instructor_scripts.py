@@ -3,8 +3,13 @@ from scripts import batch_reinvite, validate_repos
 
 
 def test_validate_repos_dry_run_builds_expected_repo_matrix(monkeypatch):
-    monkeypatch.setattr(validate_repos, "get_assignment_slugs", lambda assignment: ["hw-01"])
-    monkeypatch.setattr(validate_repos, "get_whitelisted_usernames", lambda: ["octocat", "student-1"])
+    monkeypatch.setattr(
+        validate_repos, "get_assignment_slugs", lambda assignment: ["hw-01"]
+    )
+    monkeypatch.setattr(
+        validate_repos, "get_whitelisted_usernames", lambda: ["octocat", "student-1"]
+    )
+    monkeypatch.setattr(validate_repos, "load_accepted_assignments", lambda: [])
 
     report = validate_repos.validate_repos("hw-01", dry_run=True)
 
@@ -13,6 +18,68 @@ def test_validate_repos_dry_run_builds_expected_repo_matrix(monkeypatch):
     assert report["entries"][0]["repo"] == "hw-01-octocat"
     assert report["entries"][1]["repo"] == "hw-01-student-1"
     assert all(entry["status"] == "dry_run" for entry in report["entries"])
+
+
+def test_validate_repos_reports_accepted_assignment_matches(monkeypatch):
+    monkeypatch.setattr(
+        validate_repos, "get_assignment_slugs", lambda assignment: ["hw-01"]
+    )
+    monkeypatch.setattr(
+        validate_repos, "get_whitelisted_usernames", lambda: ["octocat", "student-1"]
+    )
+    monkeypatch.setattr(
+        validate_repos,
+        "get_settings",
+        lambda: type("Settings", (), {})(),
+    )
+    monkeypatch.setattr(
+        validate_repos, "get_installation_token", lambda settings: "token"
+    )
+    monkeypatch.setattr(validate_repos, "save_report", lambda path, report: None)
+    monkeypatch.setattr(
+        validate_repos,
+        "load_accepted_assignments",
+        lambda: [
+            {
+                "assignment_id": 123,
+                "assignment_slug": "hw-01",
+                "github_username": "octocat",
+                "repo_name": "hw-01-octocat",
+                "repo_url": "https://github.com/course/hw-01-octocat",
+            }
+        ],
+    )
+
+    def fake_check_repo(repo, token):
+        if repo == "hw-01-octocat":
+            return {
+                "repo": repo,
+                "status": "exists",
+                "github_http_status": 200,
+                "message": "Repository exists.",
+            }
+        return {
+            "repo": repo,
+            "status": "permission_issue",
+            "github_http_status": 403,
+            "message": "GitHub App lacks access to this repository.",
+        }
+
+    monkeypatch.setattr(validate_repos, "check_repo", fake_check_repo)
+
+    report = validate_repos.validate_repos("hw-01")
+
+    assert report["summary"]["exists"] == 1
+    assert report["summary"]["app_lacks_access"] == 1
+    assert report["summary"]["found_in_accepted_assignments"] == 1
+    assert report["summary"]["not_found_in_accepted_assignments"] == 1
+    assert report["entries"][0]["expected_repo_status"] == "expected repo exists"
+    assert (
+        report["entries"][0]["accepted_assignment_status"]
+        == "found in accepted assignments"
+    )
+    assert report["entries"][1]["expected_repo_status"] == "app lacks access"
+    assert report["entries"][1]["app_access_status"] == "app lacks access"
 
 
 def test_batch_reinvite_dry_run_appends_audit_without_github(monkeypatch):

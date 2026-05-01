@@ -16,12 +16,14 @@ Do not commit:
 - `data/classroom_roster.csv`
 - logs or reports
 - real `data/assignments.json`
+- real `data/accepted_assignments.json`
 - real `data/whitelist.json`
 
 Only commit:
 
 - `data/classroom_roster.example.csv`
 - `data/assignments.example.json`
+- `data/accepted_assignments.example.json`
 - `data/whitelist.example.json`
 
 ## What The App Does
@@ -190,6 +192,10 @@ To also save accepted assignment data:
 python scripts/sync_classroom.py --include-accepted
 ```
 
+This writes `data/accepted_assignments.json` for instructor validation only. It
+is not required by the student-facing app, is not read during reinvite requests,
+and should not be committed.
+
 ## Adding Roster and Assignment Data
 
 ### Assignment Data
@@ -241,6 +247,7 @@ Do not commit:
 
 - `data/classroom_roster.csv`
 - `data/assignments.json`
+- `data/accepted_assignments.json`
 - `data/whitelist.json`
 - `.env`
 - private keys
@@ -251,6 +258,7 @@ Only commit:
 
 - `data/classroom_roster.example.csv`
 - `data/assignments.example.json`
+- `data/accepted_assignments.example.json`
 - `data/whitelist.example.json`
 
 ## Import Roster
@@ -272,6 +280,11 @@ Check that expected repos exist for one assignment:
 ```bash
 python scripts/validate_repos.py --assignment hw-01
 ```
+
+If `data/accepted_assignments.json` exists, validation also reports whether each
+expected repo was found in accepted assignment data. GitHub repo lookup remains
+the source of truth, so the script still calls `GET /repos/{org}/{repo}` for
+each expected repo and reports missing repos or app access problems.
 
 ## Batch Reinvite
 

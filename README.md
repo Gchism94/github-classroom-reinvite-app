@@ -65,6 +65,12 @@ python scripts/sync_classroom.py
 python scripts/import_whitelist.py
 ```
 
+Optionally sync accepted repository data for instructor validation:
+
+```bash
+python scripts/sync_classroom.py --include-accepted
+```
+
 Run locally:
 
 ```bash
@@ -103,6 +109,13 @@ http://localhost:8000
 GitHub Classroom API is only used by instructor scripts, not during student
 requests.
 
+`data/accepted_assignments.json`, when generated, is an instructor validation
+aid only. It is not required at runtime, and student requests still target:
+
+```text
+{assignment_slug}-{github_username}
+```
+
 ## Repository Naming Requirement
 
 > Repos must match:
@@ -128,6 +141,7 @@ Assignments:
 
 ```bash
 python scripts/sync_classroom.py
+python scripts/sync_classroom.py --include-accepted
 ```
 
 Roster:
@@ -146,7 +160,11 @@ Do not commit generated course files:
 
 - `data/classroom_roster.csv`
 - `data/assignments.json`
+- `data/accepted_assignments.json`
 - `data/whitelist.json`
+
+Use `data/accepted_assignments.example.json` as the safe tracked example for
+accepted repository validation data.
 
 ## Instructor Scripts
 
@@ -156,6 +174,13 @@ Do not commit generated course files:
 - `scripts/validate_repos.py`: check expected repos exist
 - `scripts/batch_reinvite.py`: batch restore write access for one assignment
 - `scripts/view_logs.py`: read audit log entries
+
+Common examples:
+
+```bash
+python scripts/sync_classroom.py --include-accepted
+python scripts/validate_repos.py --assignment example-assignment
+```
 
 ## Deployment On Render
 
@@ -193,6 +218,7 @@ Do not commit:
 - `*.pem`
 - `data/classroom_roster.csv`
 - `data/assignments.json`
+- `data/accepted_assignments.json`
 - `data/whitelist.json`
 - `logs/`
 - `reports/`

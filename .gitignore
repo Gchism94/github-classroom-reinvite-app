@@ -12,6 +12,7 @@
 # =========================
 data/classroom_roster.csv
 data/assignments.json
+data/accepted_assignments.json
 data/whitelist.json
 
 # =========================

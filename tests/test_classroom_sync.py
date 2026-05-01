@@ -70,14 +70,31 @@ def test_build_accepted_assignments_payload_groups_by_assignment_id():
             "deadline": None,
         }
     ]
-    accepted = {"123": [{"id": 456}]}
+    accepted = {
+        "123": [
+            {
+                "id": 456,
+                "students": [{"login": "octocat"}],
+                "repository": {
+                    "full_name": "course/hw-03-octocat",
+                    "html_url": "https://github.com/course/hw-03-octocat",
+                },
+            }
+        ]
+    }
 
     payload = build_accepted_assignments_payload(assignments, accepted, "999")
 
     assert payload["classroom_id"] == "999"
-    assert payload["assignments"][0]["assignment_id"] == 123
-    assert payload["assignments"][0]["slug"] == "hw-03"
-    assert payload["assignments"][0]["accepted_assignments"] == [{"id": 456}]
+    assert payload["accepted_assignments"] == [
+        {
+            "assignment_id": 123,
+            "assignment_slug": "hw-03",
+            "github_username": "octocat",
+            "repo_name": "hw-03-octocat",
+            "repo_url": "https://github.com/course/hw-03-octocat",
+        }
+    ]
 
 
 def test_sync_classroom_dry_run_does_not_save(monkeypatch):

@@ -143,20 +143,50 @@ def build_accepted_assignments_payload(
     accepted_by_assignment: dict[str, list[dict[str, Any]]],
     classroom_id: str,
 ) -> dict[str, Any]:
+    records: list[dict[str, Any]] = []
+    for assignment in assignments:
+        assignment_id = assignment["id"]
+        assignment_slug = assignment["slug"]
+        for accepted in accepted_by_assignment.get(str(assignment_id), []):
+            repository = accepted.get("repository") or {}
+            full_name = repository.get("full_name")
+            repo_name = (
+                full_name.rsplit("/", 1)[-1] if isinstance(full_name, str) else None
+            )
+            students = accepted.get("students") or []
+            student_logins = [
+                student.get("login")
+                for student in students
+                if isinstance(student, dict) and student.get("login")
+            ]
+
+            if not student_logins:
+                records.append(
+                    {
+                        "assignment_id": assignment_id,
+                        "assignment_slug": assignment_slug,
+                        "github_username": None,
+                        "repo_name": repo_name,
+                        "repo_url": repository.get("html_url"),
+                    }
+                )
+                continue
+
+            for github_username in student_logins:
+                records.append(
+                    {
+                        "assignment_id": assignment_id,
+                        "assignment_slug": assignment_slug,
+                        "github_username": github_username,
+                        "repo_name": repo_name,
+                        "repo_url": repository.get("html_url"),
+                    }
+                )
+
     return {
         "classroom_id": classroom_id,
         "synced_at": datetime.now(timezone.utc).isoformat(),
-        "assignments": [
-            {
-                "assignment_id": assignment["id"],
-                "title": assignment["title"],
-                "slug": assignment["slug"],
-                "accepted_assignments": accepted_by_assignment.get(
-                    str(assignment["id"]), []
-                ),
-            }
-            for assignment in assignments
-        ],
+        "accepted_assignments": records,
     }
 
 

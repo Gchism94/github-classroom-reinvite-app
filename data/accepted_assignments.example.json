@@ -1,0 +1,13 @@
+{
+  "accepted_assignments": [
+    {
+      "assignment_id": 123456,
+      "assignment_slug": "example-assignment",
+      "github_username": "octocat",
+      "repo_name": "example-assignment-octocat",
+      "repo_url": "https://github.com/example-org/example-assignment-octocat"
+    }
+  ],
+  "classroom_id": "12345",
+  "synced_at": "2026-05-01T00:00:00+00:00"
+}
