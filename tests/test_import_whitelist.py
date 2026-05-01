@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from scripts import import_whitelist
 from scripts.import_whitelist import extract_usernames
 
 
@@ -47,3 +48,24 @@ def test_extract_usernames_sorts_alphabetically(tmp_path: Path):
     result = extract_usernames(csv_path)
 
     assert result.usernames == ["alpha", "monalisa", "zebra"]
+
+
+def test_default_roster_path_is_data_classroom_roster_csv():
+    assert import_whitelist.DEFAULT_ROSTER_PATH.name == "classroom_roster.csv"
+    assert import_whitelist.DEFAULT_ROSTER_PATH.parent.name == "data"
+
+
+def test_custom_path_still_works(tmp_path: Path):
+    csv_path = tmp_path / "custom_roster.csv"
+    csv_path.write_text("identifier,github_username,github_id,name\n1,OctoCat,1,Octo\n")
+
+    result = extract_usernames(csv_path)
+
+    assert result.usernames == ["octocat"]
+
+
+def test_example_csv_can_be_parsed():
+    result = extract_usernames(Path("data/classroom_roster.example.csv"))
+
+    assert result.usernames == ["example-student", "octocat"]
+    assert result.total_rows == 2

@@ -15,6 +15,8 @@ if str(ROOT) not in sys.path:
 from app.config import DATA_DIR  # noqa: E402
 from app.validation import is_valid_github_username, normalize_username  # noqa: E402
 
+DEFAULT_ROSTER_PATH = DATA_DIR / "classroom_roster.csv"
+
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
@@ -22,7 +24,9 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "csv_path",
-        help="Path to a GitHub Classroom roster CSV file.",
+        nargs="?",
+        default=str(DEFAULT_ROSTER_PATH),
+        help="Path to a GitHub Classroom roster CSV file. Defaults to data/classroom_roster.csv.",
     )
     parser.add_argument(
         "--dry-run",

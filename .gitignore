@@ -1,12 +1,68 @@
+# =========================
+# Secrets & Credentials
+# =========================
 .env
+.env.*
 *.pem
+*.key
+*.crt
+
+# =========================
+# Course / Sensitive Data
+# =========================
+data/classroom_roster.csv
 data/assignments.json
 data/whitelist.json
-data/accepted_assignments.json
-classroom_roster.csv
+
+# =========================
+# Runtime Artifacts
+# =========================
 logs/
 reports/
+*.log
+
+# =========================
+# Python
+# =========================
 __pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+
+# =========================
+# Testing
+# =========================
 .pytest_cache/
+.coverage
+htmlcov/
+
+# =========================
+# Virtual Environments
+# =========================
 .venv/
+venv/
+env/
+
+# =========================
+# IDE / Editor
+# =========================
+.vscode/
+.idea/
+
+# =========================
+# OS Files
+# =========================
 .DS_Store
+
+# =========================
+# Build / Packaging
+# =========================
+build/
+dist/
+*.egg-info/
+
+# =========================
+# Jupyter (optional)
+# =========================
+.ipynb_checkpoints/

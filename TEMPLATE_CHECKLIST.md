@@ -1,12 +1,28 @@
 # Template Checklist
 
+- [ ] Create course-specific repo from this template
 - [ ] Create GitHub App for course org
 - [ ] Install app on course org
 - [ ] Set env vars
 - [ ] Copy example data files
+- [ ] Copy example roster CSV if needed
 - [ ] Sync assignments
+- [ ] Download/export real GitHub Classroom roster
+- [ ] Copy `data/classroom_roster.example.csv` to `data/classroom_roster.csv`
+- [ ] Replace example rows with real GitHub Classroom roster export
+- [ ] Save real roster as `data/classroom_roster.csv`
 - [ ] Import roster
+- [ ] Run `python scripts/import_whitelist.py`
 - [ ] Validate repos
+- [ ] Run `pytest`
+- [ ] Confirm `data/assignments.json` exists
+- [ ] Confirm `data/whitelist.json` exists
+- [ ] Confirm `data/whitelist.json` was generated
+- [ ] Confirm `data/classroom_roster.csv` is ignored by git
+- [ ] Confirm test repo exists
 - [ ] Test one student
+- [ ] Confirm audit log records event
+- [ ] Confirm deployment env vars are set
 - [ ] Deploy
+- [ ] Confirm student URL works
 - [ ] Share URL with students

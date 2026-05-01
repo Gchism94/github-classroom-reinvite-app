@@ -1,64 +1,29 @@
 # Student Instructions
 
-Use this tool when your instructor tells you to restore write access to a GitHub
+Use this tool only when your instructor asks you to restore access to a GitHub
 Classroom repository.
 
-## What The Tool Does
+## What To Do
 
-The tool checks whether your GitHub username is on your instructor's approved
-list. If it is, the tool asks GitHub to restore write access to the matching
-Classroom repository for the selected assignment.
+1. Enter your exact GitHub username.
+2. Select the assignment.
+3. Click **Request write access**.
 
-It does not change your GitHub password, create a new GitHub account, or enroll
-you in the course roster.
+The tool only works for students already approved by the instructor.
 
-## Enter Your GitHub Username
+## What Happens
 
-Enter your GitHub username exactly as it appears on GitHub. Capitalization does
-not matter; the tool normalizes usernames to lowercase.
+The tool may send you a new GitHub invitation or restore write access that
+already exists. If GitHub sends an invitation, check your GitHub notifications
+and email.
 
-Use only the username, not your profile URL.
+## If It Fails
 
-Example:
-
-```text
-octocat
-```
-
-## Select An Assignment
-
-Choose the assignment your instructor told you to fix. The assignment list comes
-from GitHub Classroom assignment data synced by the instructor.
-
-## Success Messages
-
-A success message means GitHub accepted the request. Depending on your current
-access, GitHub may either create a new invitation or confirm that write access is
-already active.
-
-If GitHub creates an invitation, check your GitHub notifications and email.
-
-## Failure Messages
-
-`Invalid GitHub username` means the username has characters GitHub does not
-allow, is too long, or starts or ends with a hyphen.
-
-`This GitHub username is not on the approved access list` means the username is
-not currently in your instructor's whitelist.
-
-`Invalid assignment` means the selected assignment is not available in this
-tool's assignment list.
-
-Other errors usually mean the tool could not update GitHub. Contact your
-instructor with your GitHub username and assignment name.
-
-## If Your Username Is Not Authorized
-
-Contact your instructor. Include:
+Contact your instructor with:
 
 - Your GitHub username
 - The assignment name
 - The repository link, if you have one
 
-The instructor must update the whitelist before the tool can restore your
-access.
+Common reasons include a username typo, your username not being approved yet, or
+the assignment not being listed.
