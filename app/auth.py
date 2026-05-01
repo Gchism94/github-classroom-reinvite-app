@@ -9,6 +9,8 @@ from app.validation import is_valid_github_username, normalize_username
 
 def load_whitelist(path: Path | None = None) -> set[str]:
     path = path or DATA_DIR / "whitelist.json"
+    if not path.exists():
+        path = DATA_DIR / "whitelist.example.json"
     with path.open() as f:
         usernames = json.load(f)
 

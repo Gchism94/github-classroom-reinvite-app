@@ -1,7 +1,12 @@
 .env
+*.pem
+data/assignments.json
+data/whitelist.json
+data/accepted_assignments.json
+classroom_roster.csv
+logs/
+reports/
 __pycache__/
 .pytest_cache/
-logs/*.log
-reports/*.json
-*.pem
-classroom_roster.csv
+.venv/
+.DS_Store

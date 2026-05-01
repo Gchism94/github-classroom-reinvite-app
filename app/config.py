@@ -23,6 +23,7 @@ class Settings(BaseModel):
     github_private_key_path: Optional[str] = None
     github_classroom_id: Optional[str] = None
     github_classroom_token: Optional[str] = None
+    course_name: str = "GitHub Classroom Reinvite Tool"
 
     @property
     def private_key(self) -> str:
@@ -75,4 +76,5 @@ def get_settings() -> Settings:
         github_private_key_path=os.getenv("GITHUB_PRIVATE_KEY_PATH"),
         github_classroom_id=os.getenv("GITHUB_CLASSROOM_ID"),
         github_classroom_token=os.getenv("GITHUB_CLASSROOM_TOKEN"),
+        course_name=os.getenv("COURSE_NAME", "GitHub Classroom Reinvite Tool"),
     )

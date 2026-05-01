@@ -4,6 +4,44 @@ This guide is for instructors running the GitHub Classroom Reinvite Tool. Versio
 1 has no instructor login and no admin dashboard; instructor operations happen
 through scripts and environment variables.
 
+## Using This Template For A New Course
+
+1. Create a new repository from this template.
+2. Clone the new course-specific repository.
+3. Copy example runtime files:
+
+```bash
+cp data/assignments.example.json data/assignments.json
+cp data/whitelist.example.json data/whitelist.json
+cp .env.example .env
+```
+
+4. Add `.env` values for the course.
+5. Add the GitHub App private key locally, or configure it as a deployment
+   secret in your hosting provider.
+6. Sync assignments:
+
+```bash
+python scripts/sync_classroom.py
+```
+
+7. Import the GitHub Classroom roster:
+
+```bash
+python scripts/import_whitelist.py classroom_roster.csv
+```
+
+8. Validate expected repositories:
+
+```bash
+python scripts/validate_repos.py --assignment example-assignment
+```
+
+9. Deploy the app.
+
+Generated files such as `data/assignments.json`, `data/whitelist.json`,
+`data/accepted_assignments.json`, `logs/`, and `reports/` are ignored by git.
+
 ## Create the GitHub App
 
 1. Go to GitHub organization settings for the organization that owns the
@@ -51,7 +89,8 @@ Required for the web app:
 GITHUB_APP_ID=123456
 GITHUB_INSTALLATION_ID=987654
 GITHUB_ORG=your-classroom-org
-GITHUB_PRIVATE_KEY="-----BEGIN RSA PRIVATE KEY-----\n...\n-----END RSA PRIVATE KEY-----"
+GITHUB_PRIVATE_KEY_PATH=./private-key.pem
+COURSE_NAME="Example Course"
 ```
 
 Optional for Classroom sync:
@@ -191,14 +230,7 @@ data/whitelist.json
 Import from a CSV:
 
 ```bash
-python scripts/import_whitelist.py students.csv
-```
-
-By default, the importer looks for a `github_username` column. To use a different
-column:
-
-```bash
-python scripts/import_whitelist.py students.csv --column username
+python scripts/import_whitelist.py classroom_roster.csv
 ```
 
 The importer lowercases usernames, validates GitHub username format, removes
@@ -211,6 +243,9 @@ management separate.
 
 ```bash
 pip install -r requirements.txt
+cp data/assignments.example.json data/assignments.json
+cp data/whitelist.example.json data/whitelist.json
+cp .env.example .env
 python run.py
 ```
 

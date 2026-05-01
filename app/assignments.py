@@ -44,6 +44,8 @@ def load_assignments() -> list[str]:
 
 def load_assignment_records() -> list[dict[str, Any]]:
     path = DATA_DIR / "assignments.json"
+    if not path.exists():
+        path = DATA_DIR / "assignments.example.json"
     with path.open() as f:
         assignments = json.load(f)
 

@@ -9,7 +9,7 @@ from fastapi.templating import Jinja2Templates
 from app.assignments import build_repo_name, load_assignment_records, load_assignments
 from app.auth import is_authorized
 from app.audit import append_audit_log
-from app.config import BASE_DIR, ConfigurationError
+from app.config import BASE_DIR, ConfigurationError, get_settings
 from app.github_app import GitHubAppAuthError
 from app.github_client import GitHubClientError, add_collaborator
 from app.schemas import AssignmentListResponse, ReinviteRequest, ReinviteResponse
@@ -134,6 +134,7 @@ def index(request: Request):
         "index.html",
         {
             "assignments": load_assignment_records(),
+            "course_name": get_settings().course_name,
         },
     )
 
@@ -147,6 +148,7 @@ def submit_reinvite(
     context = {
         "request": request,
         "assignments": load_assignment_records(),
+        "course_name": get_settings().course_name,
         "selected_assignment": assignment,
         "username": username,
     }

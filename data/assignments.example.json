@@ -1,0 +1,13 @@
+[
+  {
+    "id": 123456,
+    "title": "Example Assignment",
+    "slug": "example-assignment",
+    "invite_link": "https://classroom.github.com/a/example",
+    "type": "individual",
+    "deadline": null,
+    "accepted": null,
+    "submitted": null,
+    "passing": null
+  }
+]
