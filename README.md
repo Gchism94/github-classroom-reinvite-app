@@ -1,126 +1,109 @@
-# GitHub Classroom Reinvite App
+# GitHub Classroom Reinvite App (Template)
 
-This template creates a lightweight FastAPI web app that restores student write
-access to existing GitHub Classroom repositories. It requires a GitHub App
-installed on the course organization and expects repositories to be named
-`assignment_slug-github_username`.
+![CI](https://github.com/Gchism94/github-classroom-reinvite-app/actions/workflows/ci.yml/badge.svg)
+![Python](https://img.shields.io/badge/python-3.10%2B-blue)
+![License](https://img.shields.io/badge/license-MIT-green)
+![Template](https://img.shields.io/badge/repo-template-blue)
 
-## Quick Start (10 Minutes)
+This repository is a template for a course-specific tool that allows students to
+restore write access to their GitHub Classroom repositories. Use this template
+to create a new repository for each course.
 
-1. Create a repo from this template.
+The app:
 
-2. Create and install a GitHub App.
-
-   See [Setting Up the GitHub App](docs/instructor_setup.md#setting-up-the-github-app).
-
-3. Copy config files:
-
-   ```bash
-   cp .env.example .env
-   cp data/assignments.example.json data/assignments.json
-   cp data/whitelist.example.json data/whitelist.json
-   cp data/classroom_roster.example.csv data/classroom_roster.csv
-   ```
-
-4. Install dependencies:
-
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-5. Run app:
-
-   ```bash
-   python run.py
-   ```
-
-6. Open:
-
-   ```text
-   http://localhost:8000
-   ```
-
-7. Test with one student.
-
-## How It Works
-
-- Student enters their GitHub username.
-- Student selects an assignment.
-- The app checks `data/whitelist.json`.
-- The app grants write access to:
+- restores write access to existing repositories
+- requires a GitHub App installed on the course organization
+- assumes repositories follow this naming convention:
 
 ```text
 {assignment_slug}-{github_username}
 ```
 
-## Requirements
+## Who This Is For
+
+This is for instructors using GitHub Classroom who:
+
+- manage assignments in a GitHub organization
+- want a self-service way for students to regain repository access
+- are comfortable running simple scripts and deploying a small web app
+
+## Why This Tool Exists
+
+GitHub Classroom invitations can expire, fail, or leave students without write
+access. This tool provides a simple instructor-controlled way for approved
+students to restore access without requiring manual reinvites.
+
+## Prerequisites
 
 - GitHub Classroom organization
-- GitHub App installed on that organization
-- Repository names following the required convention
-- Assignments loaded in `data/assignments.json`
-- Approved usernames loaded in `data/whitelist.json`
+- instructor/admin access to that organization
+- GitHub account with permission to create/install GitHub Apps
+- Python 3.10+
+- course roster with GitHub usernames
 
-## Instructor Workflow
+## Quick Start
 
-Sync assignments:
-
-```bash
-python scripts/sync_classroom.py
-```
-
-Import roster:
+Copy runtime files:
 
 ```bash
-python scripts/import_whitelist.py
-```
-
-The shorthand above reads `data/classroom_roster.csv` by default. You can also
-pass a custom path:
-
-```bash
-python scripts/import_whitelist.py data/classroom_roster.csv
-```
-
-Validate repos:
-
-```bash
-python scripts/validate_repos.py --assignment <slug>
-```
-
-## Adding Course Data
-
-This template does not include real course data. For each course-specific repo,
-instructors should generate or copy local data files from the examples.
-
-```bash
+cp .env.example .env
 cp data/assignments.example.json data/assignments.json
 cp data/whitelist.example.json data/whitelist.json
 cp data/classroom_roster.example.csv data/classroom_roster.csv
 ```
 
-- `assignments.json` contains assignment metadata used by the dropdown.
-- `whitelist.json` contains approved GitHub usernames.
-- `data/classroom_roster.csv` is an instructor-provided GitHub Classroom roster export.
-- `data/classroom_roster.csv` should not be committed.
+Install dependencies:
 
-Do not commit:
+```bash
+pip install -r requirements.txt
+```
 
-- `data/classroom_roster.csv`
-- `data/assignments.json`
-- `data/whitelist.json`
-- `.env`
-- private keys
-- `logs/`
-- `reports/`
+Sync assignments and import the roster:
 
-Only commit:
+```bash
+python scripts/sync_classroom.py
+python scripts/import_whitelist.py
+```
 
-- `data/classroom_roster.example.csv`
-- `data/assignments.example.json`
-- `data/whitelist.example.json`
+Run locally:
 
-## Repository Naming Requirement (IMPORTANT)
+```bash
+python run.py
+```
+
+Open:
+
+```text
+http://localhost:8000
+```
+
+## Typical Instructor Workflow
+
+1. Create a course repo from this template.
+2. Create and install GitHub App.
+3. Configure environment variables.
+4. Sync assignments.
+5. Import roster.
+6. Validate repositories.
+7. Test with one student.
+8. Deploy.
+9. Share URL with students.
+
+## How It Works
+
+- Runtime app reads local JSON files.
+- Student submits username and assignment.
+- App validates whitelist and assignment.
+- App grants `push` access to:
+
+```text
+{assignment_slug}-{github_username}
+```
+
+GitHub Classroom API is only used by instructor scripts, not during student
+requests.
+
+## Repository Naming Requirement
 
 > Repos must match:
 >
@@ -134,142 +117,73 @@ Only commit:
 > hw-01-gchism94
 > ```
 
-## Walkthrough: Setting Up a New Course
+If the naming pattern does not match, the app will not find the repository.
 
-### 1. Create Repo From Template
+## Adding Course Data
 
-What to do: create a new course-specific repository from this template.
+This template does not include real course data. Real course files should be
+generated or copied locally.
 
-Command:
-
-```bash
-git clone <your-course-repo-url>
-cd <your-course-repo>
-```
-
-Expected outcome: you have a separate repo for the course.
-
-### 2. Create GitHub App
-
-What to do: create a GitHub App for the course organization.
-
-Command: none.
-
-Expected outcome: you have a GitHub App ID and a downloaded private key.
-
-### 3. Install App On Course Org
-
-What to do: install the app on the organization that owns the Classroom repos.
-
-Command: none.
-
-Expected outcome: you have a `GITHUB_INSTALLATION_ID`.
-
-### 4. Set `.env` Variables
-
-What to do: copy example files and fill in `.env`.
-
-Command:
-
-```bash
-cp .env.example .env
-cp data/assignments.example.json data/assignments.json
-cp data/whitelist.example.json data/whitelist.json
-```
-
-Expected outcome: local runtime files exist and are ignored by git.
-
-### 5. Sync Assignments
-
-What to do: fetch assignment metadata from GitHub Classroom.
-
-Command:
+Assignments:
 
 ```bash
 python scripts/sync_classroom.py
 ```
 
-Expected outcome: `data/assignments.json` contains course assignments.
-
-### 6. Import Roster
-
-What to do: import approved GitHub usernames from the Classroom roster CSV.
-
-Command:
+Roster:
 
 ```bash
 python scripts/import_whitelist.py
 ```
 
-Expected outcome: `data/whitelist.json` contains approved usernames.
+Expected roster CSV columns:
 
-### 7. Validate Repos
-
-What to do: confirm expected student repos exist.
-
-Command:
-
-```bash
-python scripts/validate_repos.py --assignment <slug>
+```text
+identifier,github_username,github_id,name
 ```
 
-Expected outcome: `reports/repo_validation_report.json` is created.
+Do not commit generated course files:
 
-### 8. Test One Student
+- `data/classroom_roster.csv`
+- `data/assignments.json`
+- `data/whitelist.json`
 
-What to do: run a small dry run before changing access.
+## Instructor Scripts
 
-Command:
+- `scripts/list_classrooms.py`: list Classroom IDs available to the token
+- `scripts/sync_classroom.py`: sync assignment metadata
+- `scripts/import_whitelist.py`: build whitelist from roster CSV
+- `scripts/validate_repos.py`: check expected repos exist
+- `scripts/batch_reinvite.py`: batch restore write access for one assignment
+- `scripts/view_logs.py`: read audit log entries
 
-```bash
-python scripts/batch_reinvite.py --assignment <slug> --limit 1 --dry-run
-```
+## Deployment On Render
 
-Expected outcome: the script prints the planned action without calling GitHub.
-
-### 9. Deploy
-
-What to do: deploy the app and set environment variables.
-
-Command:
-
-```bash
-uvicorn app.main:app --host 0.0.0.0 --port $PORT
-```
-
-Expected outcome: the app is reachable at your deployment URL.
-
-### 10. Share URL
-
-What to do: send the deployed URL to approved students.
-
-Command: none.
-
-Expected outcome: students can request access from the web form.
-
-## Troubleshooting
-
-- `403`: permission issue; check GitHub App repository permissions.
-- `404`: repo not found, naming mismatch, or app not installed on repo.
-- Username not authorized: update `data/whitelist.json`.
-- GitHub App auth failed: check env vars and private key path.
-- Assignment not listed: sync assignments or check `data/assignments.json`.
-
-## Deployment (Render)
-
-Build:
+Build command:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-Start:
+Start command:
 
 ```bash
 uvicorn app.main:app --host 0.0.0.0 --port $PORT
 ```
 
 Set environment variables in the Render dashboard.
+
+## Troubleshooting
+
+| Issue | What to check |
+| --- | --- |
+| Missing env vars | Copy `.env.example` and fill in required values. |
+| GitHub App authentication failed | Check app ID, installation ID, org, and private key. |
+| `403` permission issue | Confirm the app has repository Administration permission. |
+| `404` repo not found | Check repo naming, repo existence, and app installation. |
+| Username not authorized | Regenerate or edit `data/whitelist.json`. |
+| Assignment not listed | Sync assignments or check `data/assignments.json`. |
+| Private key path issue | Confirm `GITHUB_PRIVATE_KEY_PATH` points to the `.pem` file. |
 
 ## Safety Notes
 
@@ -278,10 +192,31 @@ Do not commit:
 - `.env`
 - `*.pem`
 - `data/classroom_roster.csv`
+- `data/assignments.json`
+- `data/whitelist.json`
 - `logs/`
 - `reports/`
 
-## Full Docs
+Only commit example files.
+
+## Design Principles
+
+- Minimal dependencies
+- No database required
+- Instructor-controlled configuration
+- No runtime dependency on GitHub Classroom API
+- Safe handling of student data
+
+## Project Structure
+
+- `app/`: FastAPI app, validation, GitHub clients, audit logging
+- `scripts/`: instructor utilities
+- `data/`: example data files and ignored runtime data
+- `docs/`: instructor and student documentation
+- `tests/`: pytest test suite
+
+## Full Documentation
 
 - [Instructor setup](docs/instructor_setup.md)
 - [Student instructions](docs/student_instructions.md)
+- [Template checklist](TEMPLATE_CHECKLIST.md)
