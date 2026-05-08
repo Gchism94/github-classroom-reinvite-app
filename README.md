@@ -4,6 +4,7 @@
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Template](https://img.shields.io/badge/repo-template-blue)
+[![DOI](https://zenodo.org/badge/1225906120.svg)](https://doi.org/10.5281/zenodo.20089081)
 
 This repository is a template for a course-specific tool that allows students to
 restore write access to their GitHub Classroom repositories. Use this template
